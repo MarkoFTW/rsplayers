@@ -7,6 +7,7 @@
         $regnow->setEmail($_POST['Email']);
         $regnow->setPassword(sha1($_POST['Password']));
         $regnow->setUsername($_POST['Username']);
+        $regnow->setIP($_SERVER['REMOTE_ADDR']);
         $regnow->Register();
         
         if($regnow->Register() == "true"){

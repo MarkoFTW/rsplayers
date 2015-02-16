@@ -1,7 +1,7 @@
 <?php
 
 class user{
-    private $UserID,$Username,$Email,$Password,$PasswordConfirm,$OldPassword;
+    private $UserID,$Username,$Email,$Password,$PasswordConfirm,$OldPassword,$Country,$IP;
     
     public function getUserID(){
         return $this->UserID;
@@ -45,6 +45,20 @@ class user{
         $this->PasswordConfirm = $PasswordConfirm;
     }
     
+    public function getCountry(){
+        return $this->Country;
+    }
+    public function setCountry($Country){
+        $this->Country = $Country;
+    }
+    
+    public function getIP(){
+        return $this->IP;
+    }
+    public function setIP($IP){
+        $this->IP = $IP;
+    }
+    
     public function checkUsername(){
         include "baza.inc.php";
         $req = $mysqli->prepare("SELECT * FROM users WHERE username=:Username");
@@ -73,14 +87,15 @@ class user{
     public function Register(){
         if($this->checkUsername() == false && $this->checkEmail() == false){
             include "baza.inc.php";
-            $req = $mysqli->prepare("INSERT INTO users(username,email,password,access,registered,last_seen,birthday,gender,country) VALUES (:Username,:Email,:Password,:Access,NOW(),NOW(),NOW(),:G,:C)");
+            $req = $mysqli->prepare("INSERT INTO users(username,email,password,access,registered,last_seen,birthday,gender,country,IP_ADDR) VALUES (:Username,:Email,:Password,:Access,NOW(),NOW(),NOW(),:G,:C,:IP)");
             $req->execute(array(
                 'Username' => $this->getUsername(),
                 'Email' => $this->getEmail(),
                 'Password' => $this->getPassword(),
-                'Access' => "999",
+                'Access' => "100",
                 'G' => "0",
-                'C' => "Unknown"
+                'C' => $this->FindCountry($this->getIP()),
+                'IP' => $this->getIP()
                 ));
             echo "true";
         } else {
@@ -182,6 +197,22 @@ class user{
         } else {
             header("Location: ../index.php?p=profile&a=settings&error=1");
         }
+    }
+    
+    public function FindCountry($ip){ //class
+        $url = 'http://viewdns.info/whois/?domain='.$ip;
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.001 (windows; U; NT4.0; en-US; rv:1.0) Gecko/25250101');
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
+        $db = curl_exec($ch);
+        //$info = curl_getinfo($ch);
+        //print_r($info);
+        //print_r($db);
+
+        preg_match('/country:        ([a-zA-Z0-9 ]*)/',$db,$matchme);
+        $this->setCountry($matchme[1]);
     }
 }
 

@@ -111,6 +111,10 @@ table.tablesorter tbody tr.alt-row td {
   color: #fff;
 }
 
+table.tablesorter tr:nth-child(even) {
+    background-color: #303030;
+}
+
 // MOBILE 
 
 @media(max-width:767px){
