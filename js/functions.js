@@ -1,4 +1,17 @@
  $(document).ready(function() {
+     
+    /*var selector = '.nav li';
+
+    $(selector).on('click', function(){
+        $(selector).eq(0).removeClass("active");
+        $(this).addClass('active');
+    });
+     
+    if (window.location.href.indexOf("?p=rstrack") > -1) {
+        $(selector).eq(0).removeClass("active");
+        $(selector).eq(2).addClass('active');
+    }*/
+     
     $('a.btn.btn-success').on('click', function(e) {
         $('.close-reload').attr("disabled", "disabled");
         //var data1 = $("#optVal option:selected").text();
@@ -38,10 +51,10 @@
     $('#clanpages tr > td > a.btn.btn-primary.btn-xs').on('click', function(e) {
         var data = $(this).closest('tr').find('>td:lt(4)'),
             modal = $(this).data('modal');
-        $(modal).find('.modal-body p').html( 'Sending Data to the server for clan ' + data.eq(1).text() + " with ID " + data.eq(0).text() )
+        $(modal).find('.modal-body p').html( 'Sending Data to the server for clan ' + data.eq(1).text() + " with ID " + data.eq(0).text())
         .end().modal('show');
         $.post( "./pages/showResults.php"/*$(this).data('href')*/, {
-                CLAN: data.eq(1).text(),
+                CLAN: data.eq(2).text(),
                 TID: data.eq(0).text(),
              }, function( data ) {
             $(modal).find('.modal-title').html( 'Results' ).end()
@@ -71,7 +84,7 @@
         //$(this).append("<td>"+ td1 +"</td>");
         $(this).append("<td><time class='examples' datetime='"+td1+"' data-time-tooltip> <span data-time-label=\"#_in\"></span><span data-time-label=\"td_d\" class=\"number\"></span> days, <span data-time-label=\"d_h\" class=\"number\"></span> hours, <span data-time-label=\"d_mm\" class=\"number\"></span> minutes and <span data-time-label=\"d_ss\" class=\"number\"></span> seconds <span data-time-label=\"#ago\"></span></time></td>");
     });
-    $('.myTable2 tr:gt(0)').each(function() {
+    $('.myTable3222 tr:gt(0)').each(function() {
         var td = $(this).find("td").eq(3).text().replace(/ /g,'T');
         var td1 = td += 'Z';
         //$(this).append("<td>"+ td +"</td>");2014-11-04T22:34:50Z

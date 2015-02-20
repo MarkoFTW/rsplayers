@@ -27,7 +27,36 @@ if(isset($_SESSION['UserID'])) {
                 "cname" => $clanname
             ));
             echo "<span class='confItems'>Clan successfully updated.</span><br/>";
+        }
+    } elseif (isset($_POST['editClanName'])) {
+        if (trim($_POST['clanTrackName']) == ""){
+            echo "<span class='confItems'>Empty fields.</span><br/>";
+        } else if ($_GET['action'] == 'editname') {
+            $stmnt = $mysqli->prepare("UPDATE track_history SET trackName = :name WHERE clan = :c AND trackNumHistory = :r AND userID = :s");
+            $stmnt->execute(array(
+                "name" => $_POST['clanTrackName'],
+                "c" => $_GET['c'],
+                "r" => $_GET['r'],
+                "s" => $_SESSION['UserID']
+            ));
+            echo "<span class='confItems'>Tracking name successfully updated.</span><br/>";
         } 
+    } elseif(isset($_GET['action']) && $_GET['action'] == "editname" && isset($_GET['r']) && isset($_GET['c'])){
+        $r = $_GET['r'];
+        $c = $_GET['c'];
+        $s = $_SESSION['UserID'];
+        $stmnt = $mysqli->prepare("SELECT * FROM track_history WHERE trackNumHistory = :r AND clan = :c AND userID = :s GROUP BY trackNumHistory");
+        $stmnt->execute(array(
+            "r" => $r,
+            "c" => $c,
+            "s" => $s
+        ));
+        while($editTrack = $stmnt->fetch()){
+            echo '<form name="obrazec" action="index.php?p=rstrack&amp;page=stats&amp;r=' . $_GET['r'] . '&amp;c=' . $_GET['c'] . '&amp;action=editname" method="POST">';
+                echo '<div class="input-group">Track description:<br/><textarea class="besedilo form-control" name="clanTrackName">' . $editTrack['trackName']  . '</textarea></div><br/>';
+                echo '<input type="submit" name="editClanName" class="btn btn-success" value="Save" />';
+            echo '</form>';   
+        }
     } else if (isset($_GET['id']) && $_GET['action'] == 'delnow') {
         $id = $_GET['id'];
         $ctag = $_GET['tag'];
@@ -192,7 +221,22 @@ if(isset($_SESSION['UserID'])) {
     </div>
     
     <?php    
-    
+    } else if (isset($_GET['stats']) && isset($_GET['r']) && isset($_GET['c'])){
+        if(isset($_GET['a']) && $_GET['a'] == "yes"){
+            $r = $_GET['r'];
+            $c = $_GET['c'];
+            $remove = $mysqli->prepare("DELETE FROM track_history WHERE clan = :c AND trackNumHistory = :r AND userID = :s");
+            $remove->execute(array(
+                "c" => $c,
+                "r" => $r,
+                "s" => $_SESSION['UserID']
+            ));
+            echo "Tracking history removed!";
+        } else {
+            echo 'Are you sure?<br/>';
+            echo "<a href='index.php?p=rstrack&stats&r=".$_GET['r']."&c=".$_GET['c']."&a=yes' class='btn btn-danger'>Yes</a>";
+            echo "<a href='index.php?p=rstrack&stats' class='btn btn-danger'>No</a>";
+        }
     } else if (isset($_GET['stats'])){
     ?>
         <div id="clanpages">
@@ -222,6 +266,7 @@ if(isset($_SESSION['UserID'])) {
             
         </div>
       <?php  
+      
     } else if (isset($_GET['clan']) && $_GET['clan']=="manage") {
         ?>
         <form name="obrazec" action="index.php?p=rstrack&amp;add=userclan" method="POST">    

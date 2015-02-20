@@ -334,6 +334,17 @@ class StatsTracker {
             return $f['trackNum'];
         }
     }
+    public function findTrackDate($clan, $user){
+        global $mysqli;
+        $findTrack = $mysqli->prepare("SELECT * FROM clans WHERE userID = :uid AND clantag = :ctag");
+        $findTrack->execute(array(
+            "uid" => $user,
+            "ctag" => $clan
+        ));
+        while($f = $findTrack->fetch()){
+            return $f['clanDateTime'];
+        }
+    }
     public function insertStats($status, $skills) {
         global $mysqli;//if status = end do 1
         $stmnt = $mysqli->prepare("UPDATE memberlist SET " . $status . "Overall=:overall," . $status . "Melee=:melee, " . $status . "HP=:hp, " . $status . "Ranged=:ranged, " . $status . "Magic=:magic WHERE rsn=:rsn AND userID=:uid AND clan=:cname");
@@ -359,7 +370,8 @@ class StatsTracker {
             ));
             while($h = $getHistory->fetch()){
                 $n = $this->findTrack($h['clan'],$h['userID']);
-                $history = $mysqli->prepare("INSERT INTO track_history (status,rsn,realName,clan,userID,finalOverall,finalMelee,finalHP,finalRanged,finalMagic,trackNumHistory,trackTime) VALUES (:s,:rsn,:realName,:clan,:user,:o,:m,:h,:r,:mg,:num,DATE_SUB(NOW(), INTERVAL 1 HOUR))");
+                $d = $this->findTrackDate($h['clan'],$h['userID']);
+                $history = $mysqli->prepare("INSERT INTO track_history (status,rsn,realName,clan,userID,finalOverall,finalMelee,finalHP,finalRanged,finalMagic,trackNumHistory,trackTime,trackName,trackDuration) VALUES (:s,:rsn,:realName,:clan,:user,:o,:m,:h,:r,:mg,:num,DATE_SUB(NOW(), INTERVAL 1 HOUR),:tname,:ttime)");
                 $history->execute(array(
                     's' => $h['status'],
                     'rsn' => $h['rsn'],
@@ -371,7 +383,9 @@ class StatsTracker {
                     'h' => $skills[2] - $h['startHP'],
                     'r' => $skills[3] - $h['startRanged'],
                     'mg' => $skills[4] - $h['startMagic'],
-                    'num' => $n
+                    'num' => $n,
+                    'tname' => "Click to edit",
+                    'ttime' => $d
                 ));               
             }
         }
@@ -385,10 +399,17 @@ class StatsTracker {
         if($showAllHistory->rowCount() >= 1) {
             echo "Tracking history";
             echo "<table id='myTable' class='tablesorter myTable2' border='1'>";
-            echo "<thead><th>TrackNum</th><th>Clan</th><th>View</th><th>Full Date</th><th>Tracker stopped</th></thead>";
+            echo "<thead><th>#</th><th>Track Name</th><th>Clan</th><th>View</th><th>Full Date</th><th>Tracker duration</td><th>R</td></thead>";
             echo "<tbody>";
             while($history = $showAllHistory->fetch()){
-                echo "</tr><td>". $history['trackNumHistory'] ."</td><td>". $history['clan'] ."</td><td><a class='btn btn-primary btn-xs' data-modal='#myModal' data-href='showResults.php'>View</a></td><td>". $history['trackTime']. "</td></tr>";
+                $to = new DateTime($history['trackTime']);
+                $from = new DateTime($history['trackDuration']);
+                $interval = $to->diff($from);
+                $timer = $interval->format('%a days %h hours %i minutes %S seconds');
+                //$timer = $interval->format('%y years %m months %a days %h hours %i minutes %S seconds');
+                
+                //$timer = $from->diff($to);
+                echo "</tr><td>".$history['trackNumHistory']."</td><td><a href='index.php?p=rstrack&amp;page=stats&amp;r=".$history['trackNumHistory']."&amp;c=".$history['clan']."&amp;action=editname'>". $history['trackName'] ."</a></td><td>". $history['clan'] ."</td><td><a class='btn btn-primary btn-xs' data-modal='#myModal' data-href='showResults.php'>View</a></td><td>". $history['trackTime']. "</td><td>".$timer."</td><td><a href='index.php?p=rstrack&stats&r=".$history['trackNumHistory']."&c=".$history['clan']."'><img src='http://www.qweas.com/icon/remove-duplicate-files-platinum.gif' alt='remove' width='20' height='20'></td></a></tr>";
             }
             echo "</tbody>";
             echo "</table><br/><br/><br/>";
