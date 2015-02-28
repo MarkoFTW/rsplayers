@@ -371,11 +371,12 @@ class StatsTracker {
             while($h = $getHistory->fetch()){
                 $n = $this->findTrack($h['clan'],$h['userID']);
                 $d = $this->findTrackDate($h['clan'],$h['userID']);
-                $history = $mysqli->prepare("INSERT INTO track_history (status,rsn,realName,clan,userID,finalOverall,finalMelee,finalHP,finalRanged,finalMagic,trackNumHistory,trackTime,trackName,trackDuration) VALUES (:s,:rsn,:realName,:clan,:user,:o,:m,:h,:r,:mg,:num,DATE_SUB(NOW(), INTERVAL 1 HOUR),:tname,:ttime)");
+                $history = $mysqli->prepare("INSERT INTO track_history (status,rsn,realName,rank,clan,userID,finalOverall,finalMelee,finalHP,finalRanged,finalMagic,trackNumHistory,trackTime,trackName,trackDuration) VALUES (:s,:rsn,:realName,:rank,:clan,:user,:o,:m,:h,:r,:mg,:num,DATE_SUB(NOW(), INTERVAL 1 HOUR),:tname,:ttime)");
                 $history->execute(array(
                     's' => $h['status'],
                     'rsn' => $h['rsn'],
                     'realName' => $h['realName'],
+                    'rank' => $h['rank'],
                     'clan' => $h['clan'],
                     'user' => $h['userID'],
                     'o' => $skills[0] - $h['startOverall'],
@@ -398,8 +399,8 @@ class StatsTracker {
         ));
         if($showAllHistory->rowCount() >= 1) {
             echo "Tracking history";
-            echo "<table id='myTable' class='tablesorter myTable2' border='1'>";
-            echo "<thead><th>#</th><th>Track Name</th><th>Clan</th><th>View</th><th>Full Date</th><th>Tracker duration</td><th>R</td></thead>";
+            echo "<table id='myTableHistory' class='tablesorter myTable2 myTableHistory' border='1'>";
+            echo "<thead style='color:white;'><th style='width:50px;'>#</th><th>Track Name</th><th style='width:50px;'>Clan</th><th style='width:60px;'>View</th><th style='width:150px;'>Full Date</th><th>Tracker duration</td><th style='width:50px;'>R</td></thead>";
             echo "<tbody>";
             while($history = $showAllHistory->fetch()){
                 $to = new DateTime($history['trackTime']);
@@ -409,7 +410,7 @@ class StatsTracker {
                 //$timer = $interval->format('%y years %m months %a days %h hours %i minutes %S seconds');
                 
                 //$timer = $from->diff($to);
-                echo "</tr><td>".$history['trackNumHistory']."</td><td><a href='index.php?p=rstrack&amp;page=stats&amp;r=".$history['trackNumHistory']."&amp;c=".$history['clan']."&amp;action=editname'>". $history['trackName'] ."</a></td><td>". $history['clan'] ."</td><td><a class='btn btn-primary btn-xs' data-modal='#myModal' data-href='showResults.php'>View</a></td><td>". $history['trackTime']. "</td><td>".$timer."</td><td><a href='index.php?p=rstrack&stats&r=".$history['trackNumHistory']."&c=".$history['clan']."'><img src='http://www.qweas.com/icon/remove-duplicate-files-platinum.gif' alt='remove' width='20' height='20'></td></a></tr>";
+                echo "</tr><td>".$history['trackNumHistory']."</td><td><a href='index.php?p=rstrack&amp;page=stats&amp;r=".$history['trackNumHistory']."&amp;c=".$history['clan']."&amp;action=editname'>". $history['trackName'] ."</a></td><td>". $history['clan'] ."</td><td><a class='btn btn-primary btn-xs' data-modal='#myModal' data-href='showResults.php'>View</a></td><td>". $history['trackTime']. "</td><td>".$timer."</td><td><a href='index.php?p=rstrack&stats&r=".$history['trackNumHistory']."&c=".$history['clan']."'><img src='http://www.qweas.com/icon/remove-duplicate-files-platinum.gif' alt='remove' width='20' height='20'></a></td></tr>";
             }
             echo "</tbody>";
             echo "</table><br/><br/><br/>";

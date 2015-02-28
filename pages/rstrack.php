@@ -57,6 +57,15 @@ if(isset($_SESSION['UserID'])) {
                 echo '<input type="submit" name="editClanName" class="btn btn-success" value="Save" />';
             echo '</form>';   
         }
+    } elseif(isset($_GET['d'])){
+        $d = $mysqli->prepare("DELETE FROM track_history WHERE ID = :id AND userID = :userid");
+        $d->execute(array(
+            "id" => $_GET['d'],
+            "userid" => $_SESSION['UserID']
+        ));
+        
+        echo "<span class='confItems'>Member removed.</span>";
+        
     } else if (isset($_GET['id']) && $_GET['action'] == 'delnow') {
         $id = $_GET['id'];
         $ctag = $_GET['tag'];
@@ -192,7 +201,7 @@ if(isset($_SESSION['UserID'])) {
             }
             echo "</select></div>";
             ?>
-            <input type="checkbox" name="chkbox1" value="chkbox1"/> use real names (John.RSN)<br/>
+            <input type="checkbox" name="chkbox1" value="chkbox1"/> use real names and ranks(ranks are not necessary) (Example: John.RSN.rank or just John.RSN)<br/>
             <input type="submit" class="btn btn-success" name="nalozi1" value="Confirm List"/>
         </form>
     </div>
@@ -215,7 +224,7 @@ if(isset($_SESSION['UserID'])) {
             }
             echo "</select></div>";
             ?>
-            <br/><input type="checkbox" name="chkbox2" value="chkbox2"/> use real names (John.RSN)<br/>
+            <br/><input type="checkbox" name="chkbox2" value="chkbox2"/> use real names and ranks(ranks are not necessary) (Example: John.RSN.rank or just John.RSN)<br/>
             <input type="submit" class="btn btn-success" name="nalozi" value="Submit"/>
         </form>
     </div>
@@ -312,16 +321,16 @@ if(isset($_SESSION['UserID'])) {
                 }
                 echo"</table><br/><br/><br/>";
             } else if ($_GET['page']=="final" && isset($_GET['clan'])){
-                $stmnt = $mysqli->prepare("SELECT ID, clan, rsn, realName FROM memberlist WHERE userID=:uid AND clan=:clan ORDER BY ID");
+                $stmnt = $mysqli->prepare("SELECT ID, clan, rsn, realName, rank FROM memberlist WHERE userID=:uid AND clan=:clan ORDER BY ID");
                 $stmnt->execute(array(
                     "uid" => $_SESSION['UserID'],
                     "clan" => $_GET['clan']
                 ));
                 echo"<table id='myTable' class='tablesorter' border='1'>";
-                echo"<thead><th>ID</th><th>Clan</th><th>RSN</th><th>RealName</th></thead>";
+                echo"<thead><th>ID</th><th>Clan</th><th>Rank</th><th>RSN</th><th>RealName</th></thead>";
                 echo "<tbody>";
                 while($yolo = $stmnt->fetch()){
-                    echo "<tr><td>". $yolo['ID'] ."</td><td>". $yolo['clan'] ."</td><td>". $yolo['rsn'] ."</td><td>". $yolo['realName'] ."</td></tr>";
+                    echo "<tr><td>". $yolo['ID'] ."</td><td>". $yolo['clan'] ."</td><td>". $yolo['rank'] ."</td><td>". $yolo['rsn'] ."</td><td>". $yolo['realName'] ."</td></tr>";
                 }
                 echo "</tbody>";
                 echo"</table><br/><br/><br/>";                
@@ -366,19 +375,21 @@ if(isset($_SESSION['UserID'])) {
                     if(isset($_POST['chkbox2'])){
                         $line2 = explode(".", $line);
                         //print_r($line2);
-                        $insertMembers = $mysqli->prepare("INSERT INTO memberlist (status,rsn,realName,clan,userID) VALUES ('0',:rsn,:realName,:clan,:user)");
+                        $insertMembers = $mysqli->prepare("INSERT INTO memberlist (status,rsn,realName,rank,clan,userID) VALUES ('0',:rsn,:realName,:rank,:clan,:user)");
                         $insertMembers->execute(array(
                             "rsn" => $line2[1],
                             "realName" => $line2[0],
+                            "rank" => empty($line2[2]) ? "empty" : $line2[2],
                             "user" => $_SESSION['UserID'],
                             "clan" => $_POST['clanUpload']
                         ));
                         echo "<br/>";
                     } else {
-                        $insertMembers = $mysqli->prepare("INSERT INTO memberlist (status,rsn,realName,clan,userID) VALUES ('0',:rsn,:realName,:clan,:user)");
+                        $insertMembers = $mysqli->prepare("INSERT INTO memberlist (status,rsn,realName,rank,clan,userID) VALUES ('0',:rsn,:realName,:rank,:clan,:user)");
                         $insertMembers->execute(array(
                             "rsn" => $line,
                             "realName" => "empty",
+                            "rank" => "empty",
                             "user" => $_SESSION['UserID'],
                             "clan" => $_POST['clanUpload']
                         ));
@@ -408,24 +419,26 @@ if(isset($_SESSION['UserID'])) {
                 ));
             foreach($text2 as $line_num => $line){
                 if(isset($_POST['chkbox1'])){
-                    $line = preg_replace( "/\r|\n/", "", $line );
+                    $line = preg_replace("/\r|\n/", "", $line);
                     $line2 = explode(".",$line);
                     if(!empty($line)){
-                    $insertMembers = $mysqli->prepare("INSERT INTO memberlist (status,rsn,realName,clan,userID) VALUES ('0',:rsn,:realName,:clan,:user)");
+                    $insertMembers = $mysqli->prepare("INSERT INTO memberlist (status,rsn,realName,rank,clan,userID) VALUES ('0',:rsn,:realName,:rank,:clan,:user)");
                     $insertMembers->execute(array(
                         "rsn" => $line2[1],
                         "realName" => $line2[0],
+                        "rank" => empty($line2[2]) ? "empty" : $line2[2],
                         "clan" => $_POST['clanListUpload'],
                         "user" => $_SESSION['UserID']
                         ));
                     }
                 } else {
-                    $line = preg_replace( "/\r|\n/", "", $line );
+                    $line = preg_replace("/\r|\n/", "", $line);
                     if(!empty($line)){
-                    $insertMembers = $mysqli->prepare("INSERT INTO memberlist (status,rsn,realName,clan,userID) VALUES ('0',:rsn,:realName,:clan,:user)");
+                    $insertMembers = $mysqli->prepare("INSERT INTO memberlist (status,rsn,realName,rank,clan,userID) VALUES ('0',:rsn,:realName,:rank,:clan,:user)");
                     $insertMembers->execute(array(
                         "rsn" => $line,
                         "realName" => "empty",
+                        "rank" => "empty",
                         "clan" => $_POST['clanListUpload'],
                         "user" => $_SESSION['UserID']
                         ));

@@ -35,7 +35,7 @@
                 
                 <div class="collapse navbar-collapse" id="navHeaderCollapse">
                     <ul class="nav navbar-nav navbar-left">
-                        <li class="active"><a href="index.php">Home</a></li>
+                        <li><a href="index.php">Home</a></li>
                         <li class="dropdown">
                             
                             <a href="#" class="dropdown-toggle" data-toggle="dropdown">Statistics<b class="caret"></b></a>

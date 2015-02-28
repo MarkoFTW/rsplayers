@@ -1,16 +1,10 @@
  $(document).ready(function() {
      
-    /*var selector = '.nav li';
-
-    $(selector).on('click', function(){
-        $(selector).eq(0).removeClass("active");
-        $(this).addClass('active');
+    $('li').each(function(){
+        if(window.location.href.indexOf($(this).find('a:first').attr('href'))>-1){
+            $(this).addClass('active').siblings().removeClass('active');
+        }
     });
-     
-    if (window.location.href.indexOf("?p=rstrack") > -1) {
-        $(selector).eq(0).removeClass("active");
-        $(selector).eq(2).addClass('active');
-    }*/
      
     $('a.btn.btn-success').on('click', function(e) {
         $('.close-reload').attr("disabled", "disabled");
@@ -61,7 +55,7 @@
             .find('.modal-body').html( data );
             $(modal).modal('show');
             $("#myTableEr").tablesorter({
-                sortList: [[0,0]],
+                sortList: [[1,0]],
                 widgets: [ 'filter' ]
             });
          });
@@ -69,6 +63,9 @@
     
      
     $("#myTable").tablesorter(); //zebra
+    $("#myTableHistory").tablesorter({
+        sortList: [[2,0]]
+    });
     
     //$('#myTable tr').each(function(){
         //var timer = $('#myTable tr:nth-child(2)').text();
