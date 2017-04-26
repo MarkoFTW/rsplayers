@@ -1,8 +1,8 @@
 # rsplayers
 RS2007 clan tracker
 
-#demo
-http://www.runetool.com/rsplayers
+# demo
+https://marefx.com/rsplayers
 
 ![Register](http://i.imgur.com/3HfChH7.png)
 ![View](http://i.imgur.com/jF9EXx1.png)
